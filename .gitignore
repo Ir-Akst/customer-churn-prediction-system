@@ -1,0 +1,4 @@
+__pycache__/
+*.pycgit add .
+.env
+.streamlit/secrets.toml
