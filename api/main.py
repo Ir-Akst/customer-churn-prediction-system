@@ -4,10 +4,23 @@ import pandas as pd
 import joblib
 import json
 import os
+
 # -----------------------------
 # Initialize FastAPI app
 # -----------------------------
- BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = FastAPI(
+    title="Customer Churn Prediction API",
+    version="1.0"
+)
+
+# -----------------------------
+# Load model + threshold (SAFE WAY)
+# -----------------------------
+@app.on_event("startup")
+def load_artifacts():
+    global model, threshold
+
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
     model_path = os.path.join(BASE_DIR, "..", "models", "model.pkl")
     threshold_path = os.path.join(BASE_DIR, "..", "models", "threshold.json")
@@ -19,8 +32,10 @@ import os
     with open(threshold_path) as f:
         threshold = json.load(f)["threshold"]
 
+    print("Startup complete")
+
 # -----------------------------
-# Input Schema using Pydantic
+# Input Schema
 # -----------------------------
 class CustomerData(BaseModel):
     CreditScore: int
@@ -34,14 +49,12 @@ class CustomerData(BaseModel):
     IsActiveMember: int
     EstimatedSalary: float
 
-
 # -----------------------------
-# Health Check Endpoint
+# Health Check
 # -----------------------------
 @app.get("/")
 def home():
     return {"message": "Customer Churn Prediction API is running"}
-
 
 # -----------------------------
 # Prediction Endpoint
@@ -50,13 +63,10 @@ def home():
 def predict_churn(customer: CustomerData):
 
     try:
-        # Convert request to DataFrame
         input_df = pd.DataFrame([customer.model_dump()])
 
-        # 🔥 Always use probability
         probability = model.predict_proba(input_df)[0][1]
 
-        # 🔥 Apply optimized threshold
         prediction = 1 if probability >= threshold else 0
 
         return {
