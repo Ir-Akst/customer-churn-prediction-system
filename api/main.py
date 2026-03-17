@@ -12,7 +12,7 @@ app = FastAPI(
     title="Customer Churn Prediction API",
     version="1.0"
 )
-
+print("NEW VERSION DEPLOYED")
 # -----------------------------
 # Load model + threshold (SAFE WAY)
 # -----------------------------
