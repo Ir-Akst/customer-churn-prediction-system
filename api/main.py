@@ -3,23 +3,21 @@ from pydantic import BaseModel
 import pandas as pd
 import joblib
 import json
-
+import os
 # -----------------------------
 # Initialize FastAPI app
 # -----------------------------
-app = FastAPI(
-    title="Customer Churn Prediction API",
-    description="API for predicting customer churn using a trained ML pipeline",
-    version="1.0"
-)
+ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# -----------n nm------------------
-# Load trained pipeline + threshold
-# -----------------------------
-model = joblib.load("models/model.pkl")
+    model_path = os.path.join(BASE_DIR, "..", "models", "model.pkl")
+    threshold_path = os.path.join(BASE_DIR, "..", "models", "threshold.json")
 
-with open("models/threshold.json") as f:
-    threshold = json.load(f)["threshold"]
+    print("Loading model...")
+    model = joblib.load(model_path)
+
+    print("Loading threshold...")
+    with open(threshold_path) as f:
+        threshold = json.load(f)["threshold"]
 
 # -----------------------------
 # Input Schema using Pydantic
